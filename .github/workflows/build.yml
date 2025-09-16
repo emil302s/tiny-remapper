@@ -44,7 +44,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build release JAR
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build shadowJar --stacktrace
 
       - name: Create GitHub Release and upload JAR
         uses: softprops/action-gh-release@v1
