@@ -2,9 +2,9 @@ name: Build & Release
 
 on:
   push:
-    branches: [ "**" ]        # still build/test on every push
+    branches: [ "**" ]          # build/test on every push
     tags:
-      - 'v*.*.*'               # ALSO run when a version tag is pushed
+      - 'v*.*.*'                 # ALSO run when a version tag is pushed
   pull_request:
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         java: [11-jdk, 17-jdk, 21-jdk]
-    #runs-on: self-hosted
     runs-on: ubuntu-latest
     container:
       image: eclipse-temurin:${{ matrix.java }}
@@ -28,8 +27,7 @@ jobs:
   release:
     # run only when this push is a tag that starts with "v"
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build         # wait for the build matrix to pass
-    #runs-on: self-hosted
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,16 +43,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Publish to GitHub Packages
-        run: ./gradlew publish
-        env:
-          USERNAME: ${{ github.actor }}
-          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build release JAR
+        run: ./gradlew build --stacktrace
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release and upload JAR
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}       # the pushed tag, e.g. v1.0.0
           name: Release ${{ github.ref_name }}
+          files: build/libs/*.jar                # attach built jars as assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
