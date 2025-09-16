@@ -1,10 +1,10 @@
-name: Build
+name: Build & Release
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "**" ]        # still build/test on every push
     tags:
-      - 'v*.*.*'       # also run on version tags
+      - 'v*.*.*'               # ALSO run when a version tag is pushed
   pull_request:
 
 jobs:
@@ -25,9 +25,9 @@ jobs:
       - run: ./gradlew build test --stacktrace
 
   release:
-    # run only when this push is a tag that matches v*.*.*
+    # run only when this push is a tag that starts with "v"
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build           # wait until all build matrix jobs pass
+    needs: build         # wait for the build matrix to pass
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}       # the pushed tag, e.g. v1.0.0
           name: Release ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
