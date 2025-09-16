@@ -28,7 +28,8 @@ jobs:
     # run only when this push is a tag that starts with "v"
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build         # wait for the build matrix to pass
-    runs-on: self-hosted
+    #runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
